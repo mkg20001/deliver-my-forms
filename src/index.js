@@ -24,7 +24,7 @@ const fieldDefault = {
 }
 
 function renderTemplate(str, values) {
-  return str.replace(/\$([A-Z0-9]+)/gi, (_, name) => values[name.toUpperCase()] || '(not provided)')
+  return str.replace(/\$([_A-Z0-9]+)/gi, (_, name) => values[name.toUpperCase()] || '(not provided)')
 }
 
 const init = async config => {
@@ -164,7 +164,7 @@ const init = async config => {
           }
 
           if (!mail.html) {
-            mail.html = mail.text // fallback
+            mail.html = mail.text.replace(/(\r\n|\n)/g, '<br>') // fallback
           }
 
           // NOTE: html fallback is already covered by plugin
