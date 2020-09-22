@@ -35,8 +35,6 @@ const init = async config => {
   }
 
   function handleField(config, key, value) {
-    console.log(config, key, value)
-
     switch (config.type) {
     case 'string': {
       return value
