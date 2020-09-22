@@ -1,7 +1,7 @@
 {
   "name": "deliver-my-forms",
   "version": "0.0.1",
-  "description": "Deliver my Forms is a simple nodeJS service that sends formdata you POST to it back to a specified address",
+  "description": "A simple contact-form backend written in nodeJS",
   "template": {
     "extends": [
       "nodeEslint"

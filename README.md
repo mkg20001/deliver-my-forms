@@ -1,5 +1,5 @@
 # devliver-my-forms
 
-Deliver my Forms is a simple nodeJS service that sends formdata you POST to it back to a specified address
+A simple contact-form backend written in nodeJS
 
 # Getting started
