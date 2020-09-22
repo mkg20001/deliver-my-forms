@@ -120,7 +120,7 @@ const init = async config => {
 
     let validator = Joi.object(validatorInner)
 
-    if (formConfig.allowGeneric) {
+    if (formConfig.appendGeneric) {
       validator = validator.pattern(/./, Joi.string().min(1).max(1024)) // TODO: rethink if string or allow all, but string with def should be good
     }
 
@@ -148,8 +148,8 @@ const init = async config => {
             return out
           }, {})
 
-          if (formConfig.allowGeneric) {
-            values._GENERIC = Object.keys(params).filter(key => Boolean(formConfig.fields[key])).reduce(key => `${key}:\n\n${params[key]}`).join('\n\n')
+          if (formConfig.appendGeneric) {
+            values._GENERIC = Object.keys(params).filter(key => Boolean(formConfig.fields[key])).map(key => `${key}:\n\n${params[key]}`).join('\n\n')
           }
 
           const mail = Object.assign({}, mailConfig)
@@ -163,15 +163,15 @@ const init = async config => {
             // TODO: add nodemailer plugin that transforms html to text if no text
           }
 
-          if (!mail.html) {
-            mail.html = mail.text.replace(/(\r\n|\n)/g, '<br>') // fallback
-          }
-
           // NOTE: html fallback is already covered by plugin
 
           // render all keys, including subject
           for (const key in mail) {
             mail[key] = renderTemplate(mail[key], values)
+          }
+
+          if (!mail.html) {
+            mail.html = mail.text.replace(/(\r\n|\n)/g, '<br>') // fallback
           }
 
           const res = await mailer.sendMail(mail) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
