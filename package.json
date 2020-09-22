@@ -7,6 +7,10 @@
       "nodeEslint"
     ]
   },
+  "bin": {
+    "deliver-my-forms": "./src/bin.js",
+    "deliver-my-forms-tester": "./test/bin.js"
+  },
   "main": "index.js",
   "scripts": {
     "test": "mocha -A",
