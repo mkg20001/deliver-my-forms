@@ -2,11 +2,25 @@
 
 const [form, ..._kv] = process.argv.slice(2)
 
-const kv = _kv.reduce((out, k) => {
+const kv = {}
+
+let key
+
+_kv.forEach((value, index) => {
+  if (index % 2) { // uneven=value
+    kv[key] = value
+  } else { // even=key
+    key = value
+  }
+})
+
+console.log(kv)
+
+/* const kv = _kv.reduce((out, k) => {
   out[k] = _kv[k]
 
   return out
-}, {})
+}, {}) */
 
 const fetch = require('node-fetch')
 

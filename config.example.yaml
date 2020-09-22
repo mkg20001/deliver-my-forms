@@ -23,7 +23,8 @@ storagePath: ./storage # for attachments
 
 forms:
   main:
-    subject: '[deliver my forms] $NAME has left you a message'
+    mail:
+      subject: '[deliver my forms] $NAME has left you a message'
     appendGeneric: true # fields will be appende in the format $FIELD:\n$VALUE in variable $_OTHER (or can be accessed using default syntax by name)
 
     fields:

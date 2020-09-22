@@ -35,6 +35,8 @@ const init = async config => {
   }
 
   function handleField(config, key, value) {
+    console.log(config, key, value)
+
     switch (config.type) {
     case 'string': {
       return value
@@ -130,13 +132,13 @@ const init = async config => {
       method: 'POST',
       path: '/' + form,
       config: {
-        payload: {
+        /* payload: {
           maxBytes: 209715200,
           output: 'stream',
           parse: true,
-        },
+        }, */
         handler: async (h, reply) => {
-          const {params} = h
+          const {payload: params} = h
 
           for (const key in params) {
             params[key] = escape(params[key])
@@ -161,19 +163,20 @@ const init = async config => {
             // TODO: add nodemailer plugin that transforms html to text if no text
           }
 
-          /* if (!mail.html) {
+          if (!mail.html) {
             mail.html = mail.text // fallback
           }
 
           // NOTE: html fallback is already covered by plugin
-          */
+
+          console.log(mail)
 
           const res = await mailer.sendMail(mailConfig) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
 
           return {ok: true, msgId: res.id}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
         },
         validate: {
-          // params: validator,
+          payload: validator,
         },
       },
     })
