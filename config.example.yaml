@@ -1,0 +1,79 @@
+hapi:
+  host: '127.0.0.1'
+  port: 4455
+
+mail: # see https://nodemailer.com/message/
+  # you can use the same email in from and to
+  from: 'DeliverMyForms Test <server-email@domain.com>' # email must match smtp auth user
+  to: 'You <destination-email@domain.com>'
+  subject: 'DeliverMyForms Form Submission'
+
+smtp: # see nodemailer docs (TODO: link)
+  host: server.com
+  port: 587
+  auth:
+    user: email@domain.com
+    pass: keyboardcat # your password
+  # Those settings are probably unneded, if you have TLS problems try them
+  # secure: false
+  # tls:
+  #  rejectUnauthorized: false
+
+storagePath: ./storage # for attachments
+
+forms:
+  main:
+    subject: '[deliver my forms] $NAME has left you a message'
+    appendGeneric: true # fields will be appende in the format $FIELD:\n$VALUE in variable $_OTHER (or can be accessed using default syntax by name)
+
+    fields:
+      name:
+        required: true
+
+    text: |
+      Hello Website Owner,
+
+      $NAME has left you a message
+
+      $_GENERIC
+    # TODO: html: field where HTML can be pregenerated, if only HTML then generate text from HTML after render
+  application: # job application, not the other one
+    mail: # override settings for mail, ALL fields support variables, replyTo: "$EMAIL" for example is possible
+      subject: '[hr] Job Application for $JOB from $FIRSTNAME $LASTNAME'
+    fields: # TODO: expose pseudo-joi directly so we save adding support for all the shit
+      job: # all optional, default type is string, default maxLen 1024, default minLen 1, default required false
+        required: true
+        type: string
+        maxLen: 64
+        minLen: 3
+      firstname:
+        required: true
+        type: string
+        maxLen: 64
+        minLen: 2
+      lastname:
+        required: true
+        type: string
+        maxLen: 64
+        minLen: 2
+      applicationText:
+        required: true
+        type: string
+        minLen: 30
+        maxLen: 4096
+      cv:
+        required: true
+        type: file
+        maxBytes: 1024
+    text:
+      Application from $FIRSTNAME $LASTNAME
+
+      Applied for $JOB
+
+      Application text as written by the applicant
+
+      ---
+
+      $APPLICATIONTEXT
+
+      ---

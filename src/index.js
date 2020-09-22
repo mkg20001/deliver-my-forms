@@ -14,6 +14,7 @@ const Relish = require('relish')({
 })
 
 const nodemailer = require('nodemailer')
+const htmlToText = require('nodemailer-html-to-text').htmlToText
 
 const fieldDefault = {
   type: 'string',
@@ -33,7 +34,24 @@ const init = async config => {
     },
   }
 
+  function handleField(config, key, value) {
+    switch (config.type) {
+    case 'string': {
+      return value
+    }
+
+    case 'file': {
+      break
+    }
+
+    default: {
+      throw new TypeError(config.type)
+    }
+    }
+  }
+
   const mailer = nodemailer.createTransport(config.smtp)
+  mailer.use('compile', htmlToText({})) // TODO: allow specifying options for htmlToText?
 
   const mainMailConfig = config.mail
 
@@ -84,6 +102,12 @@ const init = async config => {
         }
         break
       }
+
+      case 'file': {
+        v = Joi.any() // TOOD: add file validator
+        break
+      }
+
       default: {
         throw new TypeError(fieldConfig.type)
       }
@@ -105,37 +129,49 @@ const init = async config => {
     await server.route({
       method: 'POST',
       path: '/' + form,
-      handler: async (h, reply) => {
-        const {params} = h
+      config: {
+        payload: {
+          maxBytes: 209715200,
+          output: 'stream',
+          parse: true,
+        },
+        handler: async (h, reply) => {
+          const {params} = h
 
-        for (const key in params) {
-          params[key] = escape(params[key])
-        }
+          for (const key in params) {
+            params[key] = escape(params[key])
+          }
 
-        const values = Object.keys(params).reduce((out, key) => {
-          out[key.toUpperCase()] = out
-        }, {})
+          const values = Object.keys(params).reduce((out, key) => {
+            out[key.toUpperCase()] = handleField(formConfig.fields[key] || fieldDefault, key, params[key])
+          }, {})
 
-        if (formConfig.allowGeneric) {
-          values._GENERIC = Object.keys(params).filter(key => Boolean(formConfig.fields[key])).reduce(key => `${key}:\n\n${params[key]}`).join('\n\n')
-        }
+          if (formConfig.allowGeneric) {
+            values._GENERIC = Object.keys(params).filter(key => Boolean(formConfig.fields[key])).reduce(key => `${key}:\n\n${params[key]}`).join('\n\n')
+          }
 
-        const mail = Object.assign({}, mailConfig)
+          const mail = Object.assign({}, mailConfig)
 
-        if (formConfig.text) {
-          mail.text = renderTemplate(formConfig.text, values)
-        }
+          if (formConfig.text) {
+            mail.text = renderTemplate(formConfig.text, values)
+          }
 
-        if (formConfig.html) {
-          mail.html = renderTemplate(formConfig.html, values)
-          // TODO: add nodemailer plugin that transforms html to text if no text
-        }
+          if (formConfig.html) {
+            mail.html = renderTemplate(formConfig.html, values)
+            // TODO: add nodemailer plugin that transforms html to text if no text
+          }
 
-        const res = await mailer.send(mailConfig) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
+          /* if (!mail.html) {
+            mail.html = mail.text // fallback
+          }
 
-        return {ok: true, msgId: res.id}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
-      },
-      options: {
+          // NOTE: html fallback is already covered by plugin
+          */
+
+          const res = await mailer.sendMail(mailConfig) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
+
+          return {ok: true, msgId: res.id}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
+        },
         validate: {
           // params: validator,
         },
