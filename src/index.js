@@ -81,7 +81,7 @@ const init = async config => {
     const mailConfig = Object.assign(Object.assign({}, mainMailConfig), formConfig.mail) // we can't prefill defaults with joi in subconfig because default override main so we prefill them in main and clone+override that here
 
     const validatorInner = Object.keys(formConfig.fields).reduce((out, field) => {
-      const fieldConfig = Object.assign(Object.assign({}, fieldDefault), formConfig.fields[field]) // TODO: prefill defaults with joi
+      const fieldConfig = formConfig.fields[field] // TODO: prefill defaults with joi
 
       let v
 
@@ -144,6 +144,8 @@ const init = async config => {
 
           const values = Object.keys(params).reduce((out, key) => {
             out[key.toUpperCase()] = handleField(formConfig.fields[key] || fieldDefault, key, params[key])
+
+            return out
           }, {})
 
           if (formConfig.allowGeneric) {
@@ -153,11 +155,11 @@ const init = async config => {
           const mail = Object.assign({}, mailConfig)
 
           if (formConfig.text) {
-            mail.text = renderTemplate(formConfig.text, values)
+            mail.text = formConfig.text
           }
 
           if (formConfig.html) {
-            mail.html = renderTemplate(formConfig.html, values)
+            mail.html = formConfig.html
             // TODO: add nodemailer plugin that transforms html to text if no text
           }
 
@@ -167,7 +169,10 @@ const init = async config => {
 
           // NOTE: html fallback is already covered by plugin
 
-          console.log(mail)
+          // render all keys, including subject
+          for (const key in mail) {
+            mail[key] = renderTemplate(mail[key], values)
+          }
 
           const res = await mailer.sendMail(mailConfig) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
 
