@@ -1,0 +1,34 @@
+{
+  "name": "deliver-my-forms",
+  "version": "0.0.1",
+  "description": "Deliver my Forms is a simple nodeJS service that sends formdata you POST to it back to a specified address",
+  "template": {
+    "extends": [
+      "nodeEslint"
+    ]
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -A",
+    "cov": "nyc mocha",
+    "lint": "eslint .",
+    "fix": "eslint --fix ."
+  },
+  "keywords": [
+    "formdata",
+    "email",
+    "form",
+    "message",
+    "contact"
+  ],
+  "author": "Maciej Krüger <mkg20001@gmail.com>",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "eslint": "*",
+    "eslint-config-ipfs": "*",
+    "eslint-config-oclif": "*",
+    "mkgs-tool": "^0.1.12",
+    "mocha": "*",
+    "nyc": "*"
+  }
+}
