@@ -174,7 +174,7 @@ const init = async config => {
             mail[key] = renderTemplate(mail[key], values)
           }
 
-          const res = await mailer.sendMail(mailConfig) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
+          const res = await mailer.sendMail(mail) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
 
           return {ok: true, msgId: res.id}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
         },
