@@ -30,5 +30,16 @@
     "mkgs-tool": "^0.1.12",
     "mocha": "*",
     "nyc": "*"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^20.0.0",
+    "@hapi/inert": "^6.0.2",
+    "hapi-pino": "^8.3.0",
+    "hapi-sentry": "^3.1.0",
+    "joi": "^17.2.1",
+    "mkg-bin-gen": "^0.1.4",
+    "nodemailer": "^6.4.11",
+    "pino": "^6.6.1",
+    "relish": "^3.0.0"
   }
 }

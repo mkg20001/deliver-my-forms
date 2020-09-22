@@ -7,7 +7,7 @@ const Joi = require('joi')
 require('mkg-bin-gen')(
   'deliver-my-forms',
   {
-    validator: Joi.any()
+    validator: Joi.any(),
   },
-  require('.')
+  require('.'),
 )
