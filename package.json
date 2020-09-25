@@ -1,6 +1,6 @@
 {
   "name": "deliver-my-forms",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A simple contact-form backend written in nodeJS",
   "template": {
     "extends": [
