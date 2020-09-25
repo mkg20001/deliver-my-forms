@@ -222,6 +222,14 @@ const init = async config => {
     })
   }
 
+  server.route({
+    method: 'GET',
+    path: '/file/{filename}',
+    handler: {
+      file: request => path.join(storagePath, request.params.filename),
+    },
+  })
+
   async function stop() {
     await server.stop()
   }
