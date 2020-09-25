@@ -5,6 +5,28 @@
 
 const Hapi = require('@hapi/hapi')
 const Joi = require('joi')
+const fs = require('fs')
+const crypto = require('crypto')
+const mkdirp = require('mkdirp')
+const path = require('path')
+
+// https://stackoverflow.com/a/57876338
+const urlDecodeBytes = encoded => {
+  let decoded = Buffer.from('')
+  for (let i = 0; i < encoded.length; i++) {
+    if (encoded[i] === '%') {
+      const charBuf = Buffer.from(`${encoded[i + 1]}${encoded[i + 2]}`, 'hex')
+      decoded = Buffer.concat([decoded, charBuf])
+      i += 2
+    } else {
+      const charBuf = Buffer.from(encoded[i])
+      decoded = Buffer.concat([decoded, charBuf])
+    }
+  }
+  return decoded
+}
+
+const randName = () => crypto.randomBytes(64).toString('hex')
 
 const pino = require('pino')
 const log = pino({name: 'deliver-my-forms'})
@@ -34,14 +56,22 @@ const init = async config => {
     },
   }
 
+  mkdirp(config.storagePath)
+  const storagePath = fs.realpathSync(config.storagePath)
+  const {externalUrl} = config
+
   function handleField(config, key, value) {
     switch (config.type) {
     case 'string': {
-      return value
+      return escape(value)
     }
 
     case 'file': {
-      break
+      const name = randName() + '.' + 'bla'
+
+      fs.writeFileSync(path.join(storagePath, name), urlDecodeBytes(value))
+
+      return `${externalUrl}/file/${name}`
     }
 
     default: {
@@ -130,11 +160,14 @@ const init = async config => {
       method: 'POST',
       path: '/' + form,
       config: {
-        /* payload: {
+        payload: {
+          multipart: {
+            output: 'stream',
+          },
           maxBytes: 209715200,
           output: 'stream',
           parse: true,
-        }, */
+        },
         handler: async (h, reply) => {
           const {payload: params} = h
 
@@ -147,6 +180,10 @@ const init = async config => {
 
             return out
           }, {})
+
+          for (const key in values) {
+            values[key] = await values[key] // resolve promises
+          }
 
           if (formConfig.appendGeneric) {
             values._GENERIC = Object.keys(params).filter(key => Boolean(formConfig.fields[key])).map(key => `${key}:\n\n${params[key]}`).join('\n\n')
@@ -176,7 +213,7 @@ const init = async config => {
 
           const res = await mailer.sendMail(mail) // NOTE: this only says "mail is now in queue and being processed" not "it arrived"
 
-          return {ok: true, msgId: res.id}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
+          return {ok: true, msgId: res.messageId}  // TODO: should we expose this? it's good for tracking since that's something "an email" can be referred to, but fairly useless to the customer... could be displayed as "keep that" or sth
         },
         validate: {
           payload: validator,

@@ -20,6 +20,7 @@ smtp: # see nodemailer docs (TODO: link)
   #  rejectUnauthorized: false
 
 storagePath: ./storage # for attachments
+externalUrl: http://localhost:4455
 
 forms:
   main:

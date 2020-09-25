@@ -15,6 +15,7 @@ require('mkg-bin-gen')(
       smtp: Joi.object().pattern(/./, Joi.any()).required(),
       mail: Joi.object().pattern(/./, Joi.any()).required(),
       storagePath: Joi.string().required(),
+      externalUrl: Joi.string().uri().required(),
       forms: Joi.object().pattern(/^[a-z0-9]+$/mi, Joi.object({
         mail: Joi.object(),
         appendGeneric: Joi.boolean().default(false),

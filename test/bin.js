@@ -1,37 +1,30 @@
 'use strict'
 
-const [form, ..._kv] = process.argv.slice(2)
-
-const kv = {}
-
-let key
-
-_kv.forEach((value, index) => {
-  if (index % 2) { // uneven=value
-    kv[key] = value
-  } else { // even=key
-    key = value
-  }
-})
-
-console.log(kv)
-
-/* const kv = _kv.reduce((out, k) => {
-  out[k] = _kv[k]
-
-  return out
-}, {}) */
-
+const fs = require('fs')
+const FormData = require('form-data')
 const fetch = require('node-fetch')
 
+const form = new FormData()
+
 async function main() {
-  const rawResponse = await fetch(`http://localhost:4455/${form}`, {
+  const [formId, ..._kv] = process.argv.slice(2)
+
+  let key
+
+  _kv.forEach((value, index) => {
+    if (index % 2) { // uneven=value
+      form.append(key, value.startsWith('/') ? fs.readFileSync(value) : value)
+    } else { // even=key
+      key = value
+    }
+  })
+
+  console.log(form)
+
+  const rawResponse = await fetch(`http://localhost:4455/${formId}`, {
     method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(kv),
+    body: form,
+    headers: form.getHeaders(),
   })
 
   const res = await rawResponse.json()
