@@ -225,9 +225,19 @@ const init = async config => {
   server.route({
     method: 'GET',
     path: '/file/{filename}',
-    handler: {
-      file: request => path.join(storagePath, request.params.filename),
+    config: {
+      validate: {
+        params: Joi.object({
+          filename: Joi.string().pattern(/[a-z0-9.]/mi),
+        }),
+      },
+      handler: (request, h) => {
+        return h.file(path.join(storagePath, request.params.filename), {
+          confine: false,
+        })
+      },
     },
+
   })
 
   async function stop() {
